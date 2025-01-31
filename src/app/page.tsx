@@ -1,37 +1,11 @@
 'use client'
 
-import { useState, useEffect } from "react";
-
-interface APIModelResponse {
-  "name": string,
-  "modified_at": string,
-  "size": number,
-  "digest": string,
-  "details": {
-    "format": string,
-    "family": string,
-    "families": string | null,
-    "parameter_size": string,
-    "quantization_level": string
-  }
-}
-interface APIChatFinalResponse {
-  "model": string,
-  "created_at": string,
-  "response": string,
-  "done": boolean,
-  "context": number[],
-  "total_duration": number,
-  "load_duration": number,
-  "prompt_eval_count": number,
-  "prompt_eval_duration": number,
-  "eval_count": number,
-  "eval_duration": number
-}
+import { useState, useEffect } from 'react';
+import ollama, { ModelResponse } from 'ollama/browser';
 
 export default function Home() {
   const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
-  const [models, setModels] = useState<APIModelResponse[]>([]);
+  const [models, setModels] = useState<ModelResponse[]>([]);
 
   const [model, setCurrentModel] = useState<string>('llama3.2');
   const [prompt, setPrompt] = useState<string>('Prompt goes here');
@@ -52,11 +26,10 @@ export default function Home() {
   );
 };
 
-const getModels = async (setApiIsOnline: (isOnline: boolean) => void, setModels: (models: APIModelResponse[]) => void) => {
+const getModels = async (setApiIsOnline: (isOnline: boolean) => void, setModels: (models: ModelResponse[]) => void) => {
   try {
-    const response = await fetch('http://localhost:11434/api/tags');
-    const json = await response.json();
-    const models = json.models as APIModelResponse[];
+    const response = await ollama.list();
+    const models = response.models;
     setApiIsOnline(true);
     setModels(models);
   } catch {
@@ -67,18 +40,12 @@ const getModels = async (setApiIsOnline: (isOnline: boolean) => void, setModels:
 const onSend = async (model: string, prompt: string, setResponse: (response: string) => void) => {
   setResponse('Requesting...');
   try {
-    const response = await fetch('http://localhost:11434/api/generate',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          model: model,
-          prompt: prompt,
-          stream: false
-        })
-      }
-    );
-    const chat = await response.json() as APIChatFinalResponse;
-    setResponse(chat.response);
+    const response = await ollama.generate({
+      model: model,
+      prompt: prompt,
+      stream: false
+    });
+    setResponse(response.response);
   } catch {
     setResponse('Prompt failed');
   }
