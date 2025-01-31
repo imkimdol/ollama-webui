@@ -40,12 +40,17 @@ const getModels = async (setApiIsOnline: (isOnline: boolean) => void, setModels:
 const onSend = async (model: string, prompt: string, setResponse: (response: string) => void) => {
   setResponse('Requesting...');
   try {
-    const response = await ollama.generate({
+    const responseIterator = await ollama.generate({
       model: model,
       prompt: prompt,
-      stream: false
+      stream: true
     });
-    setResponse(response.response);
+
+    let partialText: string = '';
+    for await (const partialResponse of responseIterator) {
+      partialText += partialResponse.response;
+      setResponse(partialText);
+    }
   } catch {
     setResponse('Prompt failed');
   }
