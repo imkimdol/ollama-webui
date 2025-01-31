@@ -2,16 +2,18 @@
 
 import { useContext, useState } from 'react';
 import ollama, { Message } from 'ollama/browser';
-import { APIOnlineContext, ModelsContext } from '@/contexts/contexts';
+import { APIOnlineContext, ModelsContext } from '@/contexts/values';
+import { CheckAPIFuncContext } from '@/contexts/functions';
 
 export default function Chat() {
+  const apiIsOnline = useContext(APIOnlineContext);
+  const models = useContext(ModelsContext);
+  const checkAPI = useContext(CheckAPIFuncContext);
+
   const [currentModel, setCurrentModel] = useState<string>('llama3.2');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentResponse, setCurrentResponse] = useState<Message | null>(null);
   const [prompt, setPrompt] = useState<string>('');
-
-  const apiIsOnline = useContext(APIOnlineContext);
-  const models = useContext(ModelsContext);
 
   const onSend = async () => {
     try {
@@ -43,7 +45,7 @@ export default function Chat() {
       setMessages([...newMessages, responseMessage]);
       setCurrentResponse(null);
     } catch {
-      
+      checkAPI();
     }
   };
 

@@ -2,11 +2,13 @@
 
 import { useState, useContext } from 'react';
 import ollama from 'ollama/browser';
-import { APIOnlineContext, ModelsContext } from '@/contexts/contexts';
+import { APIOnlineContext, ModelsContext } from '@/contexts/values';
+import { CheckAPIFuncContext } from '@/contexts/functions';
 
 export default function Home() {
   const apiIsOnline = useContext(APIOnlineContext);
   const models = useContext(ModelsContext);
+  const checkAPI = useContext(CheckAPIFuncContext);
 
   const [model, setCurrentModel] = useState<string>('llama3.2');
   const [prompt, setPrompt] = useState<string>('');
@@ -29,6 +31,7 @@ export default function Home() {
       }
     } catch {
       setResponse('Prompt failed');
+      checkAPI();
     }
   };
 
