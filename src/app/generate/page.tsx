@@ -1,34 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import ollama, { ModelResponse } from 'ollama/browser';
+import { useState, useContext } from 'react';
+import ollama from 'ollama/browser';
+import { ModelsContext } from '@/contexts/contexts';
 
 export default function Home() {
-  const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
-  const [models, setModels] = useState<ModelResponse[]>([]);
+  const models = useContext(ModelsContext);
 
   const [model, setCurrentModel] = useState<string>('llama3.2');
   const [prompt, setPrompt] = useState<string>('');
   const [response, setResponse] = useState<string>('Prompt response goes here!');
 
-  useEffect(() => {
-    checkModels();
-    setInterval(() => checkModels(), 10000);
-  }, []);
 
-
-  const checkModels = async () => {
-    try {
-      const response = await ollama.list();
-      const models = response.models;
-      setApiIsOnline(true);
-      setModels(models);
-    } catch {
-      setApiIsOnline(false);
-      setModels([]);
-    }
-  };
-  
   const onSend = async () => {
     setResponse('Requesting...');
     try {
@@ -45,14 +28,11 @@ export default function Home() {
       }
     } catch {
       setResponse('Prompt failed');
-      checkModels();
     }
   };
 
   return (
-    <div>
-      <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
-      
+    <div>      
       <p>{response}</p>
       <select value={model} onChange={(e) => setCurrentModel(e.target.value)}>
         {models.map(m => {
