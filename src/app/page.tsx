@@ -10,7 +10,12 @@ export default function Home() {
   const [model, setCurrentModel] = useState<string>('llama3.2');
   const [prompt, setPrompt] = useState<string>('Prompt goes here');
   const [response, setResponse] = useState<string>('Prompt response goes here!');
-  useEffect(() => {checkModels()}, []);
+
+  useEffect(() => {
+    checkModels();
+    setInterval(() => checkModels(), 10000);
+  }, []);
+
 
   const checkModels = async () => {
     try {
@@ -20,6 +25,7 @@ export default function Home() {
       setModels(models);
     } catch {
       setApiIsOnline(false);
+      setModels([]);
     }
   };
   
@@ -39,6 +45,7 @@ export default function Home() {
       }
     } catch {
       setResponse('Prompt failed');
+      checkModels();
     }
   };
 
