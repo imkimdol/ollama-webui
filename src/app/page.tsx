@@ -8,7 +8,7 @@ export default function Home() {
   const [models, setModels] = useState<ModelResponse[]>([]);
 
   const [model, setCurrentModel] = useState<string>('llama3.2');
-  const [prompt, setPrompt] = useState<string>('Prompt goes here');
+  const [prompt, setPrompt] = useState<string>('');
   const [response, setResponse] = useState<string>('Prompt response goes here!');
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function Home() {
       })}
       <p>{response}</p>
       <input type="text" value={model} onChange={(e) => setCurrentModel(e.target.value)}/>
-      <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)}/>
-      <button onClick={() => {onSend()}}>**SEND**</button>
+      <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
+      <button onClick={() => {onSend()}}>Send Request</button>
     </div>
   );
 };
