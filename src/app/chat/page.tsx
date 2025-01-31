@@ -49,7 +49,7 @@ export default function Chat() {
 
   return (
     <div>
-      
+      <h1>Chat</h1>
       {messages.map((m, i) => <ChatMessageComponent key={i} message={m}/>)}
       {currentResponse && <ChatMessageComponent message={currentResponse}/>}
       <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
@@ -58,7 +58,7 @@ export default function Chat() {
         })}
       </select>
       <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
-      <button onClick={() => {onSend()}}>Send Request</button>
+      <button disabled={!apiIsOnline} onClick={() => {onSend()}}>Send Request</button>
     </div>
   );
 };

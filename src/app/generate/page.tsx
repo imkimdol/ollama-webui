@@ -2,9 +2,10 @@
 
 import { useState, useContext } from 'react';
 import ollama from 'ollama/browser';
-import { ModelsContext } from '@/contexts/contexts';
+import { APIOnlineContext, ModelsContext } from '@/contexts/contexts';
 
 export default function Home() {
+  const apiIsOnline = useContext(APIOnlineContext);
   const models = useContext(ModelsContext);
 
   const [model, setCurrentModel] = useState<string>('llama3.2');
@@ -32,7 +33,8 @@ export default function Home() {
   };
 
   return (
-    <div>      
+    <div>
+      <h1>Generate</h1>   
       <p>{response}</p>
       <select value={model} onChange={(e) => setCurrentModel(e.target.value)}>
         {models.map(m => {
@@ -40,7 +42,7 @@ export default function Home() {
         })}
       </select>
       <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
-      <button onClick={() => {onSend()}}>Send Request</button>
+      <button disabled={!apiIsOnline} onClick={() => {onSend()}}>Send Request</button>
     </div>
   );
 };
