@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ollama, { Message, ModelResponse } from 'ollama/browser';
+import Markdown from 'react-markdown';
 
 interface MessageData extends Message {
   current: boolean,
@@ -112,7 +113,7 @@ export default function Chat() {
           <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
         </div> :
         <div>
-          <p>{message.content}</p>
+          <Markdown>{message.content}</Markdown>
           <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
           <button disabled={message.current} onClick={() => {deleteMessagesUpToIndex(index);}}>Delete</button>
         </div>}
