@@ -3,10 +3,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import ollama, { Message, ModelResponse } from 'ollama/browser';
 
+interface MessageData extends Message {
+  current: boolean,
+}
+
 export default function Chat() {
   const [currentModel, setCurrentModel] = useState<string>('llama3.2');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentResponse, setCurrentResponse] = useState<Message | null>(null);
+  const [messages, setMessages] = useState<MessageData[]>([]);
+  const [currentResponse, setCurrentResponse] = useState<MessageData | null>(null);
   const [prompt, setPrompt] = useState<string>('');
   const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
   const [models, setModels] = useState<ModelResponse[]>([]);
@@ -38,12 +42,12 @@ export default function Chat() {
   };
 
   const onSend = async () => {
-    const promptMessage = { role: 'user', content: prompt };
+    const promptMessage = { current: false, role: 'user', content: prompt };
     const newMessages = [...messages, promptMessage];
     setMessages(newMessages);
     setPrompt('');
 
-    const responseMessage: Message = { role: 'assistant', content: 'Requesting...'};
+    const responseMessage: MessageData = { current: true, role: 'assistant', content: 'Requesting...'};
     setCurrentResponse(responseMessage);
 
     try {
@@ -65,13 +69,15 @@ export default function Chat() {
         setCurrentResponse(prev => ({ ...prev, ...responseMessage }));
       }
 
+      responseMessage.current = false;
       setMessages([...newMessages, responseMessage]);
       setCurrentResponse(null);
     } catch {
       checkAPI();
 
+      responseMessage.current = false;
       newMessages.push(responseMessage);
-      newMessages.push({ role: 'assistant', content: 'Request Failed! '});
+      newMessages.push({ current: false, role: 'assistant', content: 'Request Failed! '});
       setMessages(newMessages);
       setCurrentResponse(null);
     }
@@ -96,7 +102,7 @@ export default function Chat() {
   );
 };
 
-function ChatMessageComponent({ message, updateMessages }: { message: Message, updateMessages: () => void }) {
+function ChatMessageComponent({ message, updateMessages }: { message: MessageData, updateMessages: () => void }) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editText, setEditText] = useState<string>(message.content);
 
@@ -111,7 +117,7 @@ function ChatMessageComponent({ message, updateMessages }: { message: Message, u
       </div> :
       <div>
         <p>{ message.content }</p>
-        <button onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
+        <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
       </div>}
     </div>
   );
