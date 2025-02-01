@@ -21,6 +21,10 @@ export default function Chat() {
     checkAPI();
   }, [checkAPI]);
 
+  const updateMessages = () => {
+    setMessages([...messages]);
+  }
+
   const checkModels = async () => {
     try {
       const response = await ollama.list();
@@ -78,8 +82,8 @@ export default function Chat() {
       <button onClick={checkAPI}>Refresh</button>
       
       <h1>Chat</h1>
-      {messages.map((m, i) => <ChatMessageComponent key={i} message={m}/>)}
-      {currentResponse && <ChatMessageComponent message={currentResponse}/>}
+      {messages.map((m, i) => <ChatMessageComponent key={i} message={m} updateMessages={updateMessages} />)}
+      {currentResponse && <ChatMessageComponent message={currentResponse} updateMessages={updateMessages}/>}
       <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
         {models.map(m => {
           return <option value={m.name} key={m.name}>{m.name}</option>
@@ -91,11 +95,23 @@ export default function Chat() {
   );
 };
 
-function ChatMessageComponent({ message }: { message: Message }) {
+function ChatMessageComponent({ message, updateMessages }: { message: Message, updateMessages: () => void }) {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editText, setEditText] = useState<string>(message.content);
+
   return (
     <div>
       <p>{ message.role === 'assistant' ? 'ASSISTANT: ' : 'USER: '}</p>
-      <p>{ message.content }</p>
+
+      {isEditing ?
+      <div>
+        <input type="text" value={editText} onChange={e => setEditText(e.target.value)}/>
+        <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
+      </div> :
+      <div>
+        <p>{ message.content }</p>
+        <button onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
+      </div>}
     </div>
   );
 };
