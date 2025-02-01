@@ -55,7 +55,7 @@ export default function Chat() {
       });
 
       let first = true;
-      for await (const partialResponse of responseIterator) {        
+      for await (const partialResponse of responseIterator) {
         if (first) {
           responseMessage.content = '';
           first = false;
@@ -80,12 +80,15 @@ export default function Chat() {
     }
   };
 
-  const onSend = async () => {
+  const onSend = () => {
     const promptMessage = { current: false, role: 'user', content: prompt };
-    const messages = [...history, promptMessage];
-    requestChat(messages);
+    requestChat([...history, promptMessage]);
     setPrompt('');
   };
+
+  const onRegenerate = () => {
+    requestChat(history.slice(0, -1));
+  }
 
   return (
     <div>
@@ -95,13 +98,14 @@ export default function Chat() {
       <h1>Chat</h1>
       {history.map((m, i) => <ChatMessageComponent key={i} message={m} updateMessages={updateMessages} />)}
       {currentResponse && <ChatMessageComponent message={currentResponse} updateMessages={updateMessages}/>}
+      <button disabled={!apiIsOnline || currentResponse != null || history.length == 0 || history[history.length-1].role != 'assistant'} onClick={onRegenerate}>Regenerate</button>
       <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
         {models.map(m => {
           return <option value={m.name} key={m.name}>{m.name}</option>
         })}
       </select>
       <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
-      <button disabled={!apiIsOnline || currentResponse != null} onClick={() => {onSend()}}>Send Request</button>
+      <button disabled={!apiIsOnline || currentResponse != null} onClick={onSend}>Send Request</button>
     </div>
   );
 };
