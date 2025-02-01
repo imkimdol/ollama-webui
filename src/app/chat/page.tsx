@@ -59,7 +59,6 @@ export default function Chat() {
 
       let first = true;
       for await (const partialResponse of responseIterator) {
-        console.log(stopGeneration.current);
         if (stopGeneration.current) break;
         if (first) {
           responseMessage.content = '';
