@@ -90,14 +90,40 @@ export default function Chat() {
     requestChat(history.slice(0, -1));
   }
 
+  const deleteMessagesUpToIndex = (index: number) => {
+    setHistory(history.slice(0, index));
+  }
+
+  function ChatMessageComponent({ index, message }: { index: number, message: MessageData}) {
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editText, setEditText] = useState<string>(message.content);
+  
+    return (
+      <div>
+        <p>{ message.role === 'assistant' ? 'ASSISTANT: ' : 'USER: '}</p>
+  
+        {isEditing ?
+        <div>
+          <input type="text" value={editText} onChange={e => setEditText(e.target.value)}/>
+          <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
+        </div> :
+        <div>
+          <p>{ message.content }</p>
+          <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
+          <button disabled={message.current} onClick={() => {deleteMessagesUpToIndex(index);}}>Delete</button>
+        </div>}
+      </div>
+    );
+  };
+
   return (
     <div>
       <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
       <button onClick={checkAPI}>Refresh</button>
       
       <h1>Chat</h1>
-      {history.map((m, i) => <ChatMessageComponent key={i} message={m} updateMessages={updateMessages} />)}
-      {currentResponse && <ChatMessageComponent message={currentResponse} updateMessages={updateMessages}/>}
+      {history.map((m, i) => <ChatMessageComponent key={i} index={i} message={m}/>)}
+      {currentResponse && <ChatMessageComponent index={0} message={currentResponse}/>}
       <button disabled={!apiIsOnline || currentResponse != null || history.length == 0 || history[history.length-1].role != 'assistant'} onClick={onRegenerate}>Regenerate</button>
       <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
         {models.map(m => {
@@ -106,27 +132,6 @@ export default function Chat() {
       </select>
       <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
       <button disabled={!apiIsOnline || currentResponse != null} onClick={onSend}>Send Request</button>
-    </div>
-  );
-};
-
-function ChatMessageComponent({ message, updateMessages }: { message: MessageData, updateMessages: () => void }) {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [editText, setEditText] = useState<string>(message.content);
-
-  return (
-    <div>
-      <p>{ message.role === 'assistant' ? 'ASSISTANT: ' : 'USER: '}</p>
-
-      {isEditing ?
-      <div>
-        <input type="text" value={editText} onChange={e => setEditText(e.target.value)}/>
-        <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
-      </div> :
-      <div>
-        <p>{ message.content }</p>
-        <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
-      </div>}
     </div>
   );
 };
