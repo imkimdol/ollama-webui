@@ -1,29 +1,47 @@
 'use client'
 
-import { useContext, useState } from 'react';
-import ollama, { Message } from 'ollama/browser';
-import { APIOnlineContext, ModelsContext } from '@/contexts/values';
-import { CheckAPIFuncContext } from '@/contexts/functions';
+import { useCallback, useEffect, useState } from 'react';
+import ollama, { Message, ModelResponse } from 'ollama/browser';
 
 export default function Chat() {
-  const apiIsOnline = useContext(APIOnlineContext);
-  const models = useContext(ModelsContext);
-  const checkAPI = useContext(CheckAPIFuncContext);
-
   const [currentModel, setCurrentModel] = useState<string>('llama3.2');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentResponse, setCurrentResponse] = useState<Message | null>(null);
   const [prompt, setPrompt] = useState<string>('');
+  const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
+  const [models, setModels] = useState<ModelResponse[]>([]);
+
+  const checkAPI = useCallback(async () => {
+    setApiIsOnline(false);
+    setModels([]);
+    checkModels();
+  }, []);
+
+  useEffect(() => {
+    checkAPI();
+  }, [checkAPI]);
+
+  const checkModels = async () => {
+    try {
+      const response = await ollama.list();
+      const models = response.models;
+      setApiIsOnline(true);
+      setModels(models);
+    } catch {
+      setApiIsOnline(false);
+      setModels([]);
+    }
+  };
 
   const onSend = async () => {
+    const promptMessage = { role: 'user', content: prompt };
+    const newMessages = [...messages, promptMessage];
+    setMessages(newMessages);
+
+    const responseMessage: Message = { role: 'assistant', content: 'Requesting...'};
+    setCurrentResponse(responseMessage);
+
     try {
-      const promptMessage = { role: 'user', content: prompt };
-      const newMessages = [...messages, promptMessage];
-      setMessages(newMessages);
-
-      const responseMessage: Message = { role: 'assistant', content: 'Requesting...'};
-      setCurrentResponse(responseMessage);
-
       const responseIterator = await ollama.chat({
         model: currentModel,
         messages: newMessages,
@@ -46,11 +64,19 @@ export default function Chat() {
       setCurrentResponse(null);
     } catch {
       checkAPI();
+
+      newMessages.push(responseMessage);
+      newMessages.push({ role: 'assistant', content: 'Request Failed! '});
+      setMessages(newMessages);
+      setCurrentResponse(null);
     }
   };
 
   return (
     <div>
+      <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
+      <button onClick={checkAPI}>Refresh</button>
+      
       <h1>Chat</h1>
       {messages.map((m, i) => <ChatMessageComponent key={i} message={m}/>)}
       {currentResponse && <ChatMessageComponent message={currentResponse}/>}
