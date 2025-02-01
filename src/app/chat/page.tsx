@@ -41,6 +41,10 @@ export default function Chat() {
     }
   };
 
+  const requestChat = async (messages: MessageData[]) => {
+
+  };
+
   const onSend = async () => {
     const promptMessage = { current: false, role: 'user', content: prompt };
     const newMessages = [...messages, promptMessage];
@@ -97,7 +101,7 @@ export default function Chat() {
         })}
       </select>
       <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
-      <button disabled={!apiIsOnline} onClick={() => {onSend()}}>Send Request</button>
+      <button disabled={!apiIsOnline || currentResponse != null} onClick={() => {onSend()}}>Send Request</button>
     </div>
   );
 };
