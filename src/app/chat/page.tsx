@@ -9,7 +9,7 @@ interface MessageData extends Message {
 
 export default function Chat() {
   const [currentModel, setCurrentModel] = useState<string>('llama3.2');
-  const [messages, setMessages] = useState<MessageData[]>([]);
+  const [history, setHistory] = useState<MessageData[]>([]);
   const [currentResponse, setCurrentResponse] = useState<MessageData | null>(null);
   const [prompt, setPrompt] = useState<string>('');
   const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
@@ -26,7 +26,7 @@ export default function Chat() {
   }, [checkAPI]);
 
   const updateMessages = () => {
-    setMessages([...messages]);
+    setHistory([...history]);
   }
 
   const checkModels = async () => {
@@ -42,14 +42,7 @@ export default function Chat() {
   };
 
   const requestChat = async (messages: MessageData[]) => {
-
-  };
-
-  const onSend = async () => {
-    const promptMessage = { current: false, role: 'user', content: prompt };
-    const newMessages = [...messages, promptMessage];
-    setMessages(newMessages);
-    setPrompt('');
+    setHistory(messages);
 
     const responseMessage: MessageData = { current: true, role: 'assistant', content: 'Requesting...'};
     setCurrentResponse(responseMessage);
@@ -57,7 +50,7 @@ export default function Chat() {
     try {
       const responseIterator = await ollama.chat({
         model: currentModel,
-        messages: newMessages,
+        messages: messages,
         stream: true
       });
 
@@ -74,17 +67,24 @@ export default function Chat() {
       }
 
       responseMessage.current = false;
-      setMessages([...newMessages, responseMessage]);
+      setHistory([...messages, responseMessage]);
       setCurrentResponse(null);
     } catch {
       checkAPI();
 
       responseMessage.current = false;
-      newMessages.push(responseMessage);
-      newMessages.push({ current: false, role: 'assistant', content: 'Request Failed! '});
-      setMessages(newMessages);
+      messages.push(responseMessage);
+      messages.push({ current: false, role: 'assistant', content: 'Request Failed! '});
+      setHistory(messages);
       setCurrentResponse(null);
     }
+  };
+
+  const onSend = async () => {
+    const promptMessage = { current: false, role: 'user', content: prompt };
+    const messages = [...history, promptMessage];
+    requestChat(messages);
+    setPrompt('');
   };
 
   return (
@@ -93,7 +93,7 @@ export default function Chat() {
       <button onClick={checkAPI}>Refresh</button>
       
       <h1>Chat</h1>
-      {messages.map((m, i) => <ChatMessageComponent key={i} message={m} updateMessages={updateMessages} />)}
+      {history.map((m, i) => <ChatMessageComponent key={i} message={m} updateMessages={updateMessages} />)}
       {currentResponse && <ChatMessageComponent message={currentResponse} updateMessages={updateMessages}/>}
       <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
         {models.map(m => {
