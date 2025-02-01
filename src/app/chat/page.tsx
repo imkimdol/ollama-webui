@@ -41,6 +41,7 @@ export default function Chat() {
     const promptMessage = { role: 'user', content: prompt };
     const newMessages = [...messages, promptMessage];
     setMessages(newMessages);
+    setPrompt('');
 
     const responseMessage: Message = { role: 'assistant', content: 'Requesting...'};
     setCurrentResponse(responseMessage);
