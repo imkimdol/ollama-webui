@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ollama, { Message, ModelResponse } from 'ollama/browser';
 
 interface MessageData extends Message {
@@ -14,6 +14,8 @@ export default function Chat() {
   const [prompt, setPrompt] = useState<string>('');
   const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
   const [models, setModels] = useState<ModelResponse[]>([]);
+
+  const stopGeneration = useRef<boolean>(false);
 
   const checkAPI = useCallback(async () => {
     setApiIsOnline(false);
@@ -42,6 +44,7 @@ export default function Chat() {
   };
 
   const requestChat = async (messages: MessageData[]) => {
+    stopGeneration.current = false;
     setHistory(messages);
 
     const responseMessage: MessageData = { current: true, role: 'assistant', content: 'Requesting...'};
@@ -56,6 +59,8 @@ export default function Chat() {
 
       let first = true;
       for await (const partialResponse of responseIterator) {
+        console.log(stopGeneration.current);
+        if (stopGeneration.current) break;
         if (first) {
           responseMessage.content = '';
           first = false;
@@ -108,7 +113,7 @@ export default function Chat() {
           <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
         </div> :
         <div>
-          <p>{ message.content }</p>
+          <p>{message.content}</p>
           <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
           <button disabled={message.current} onClick={() => {deleteMessagesUpToIndex(index);}}>Delete</button>
         </div>}
@@ -132,6 +137,7 @@ export default function Chat() {
       </select>
       <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
       <button disabled={!apiIsOnline || currentResponse != null} onClick={onSend}>Send Request</button>
+      {currentResponse && <button onClick={() => stopGeneration.current = true}>Stop</button>}
     </div>
   );
 };
