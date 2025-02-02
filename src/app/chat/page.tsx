@@ -14,6 +14,7 @@ export default function Chat() {
   const id = useContext(CurrentChatIDContext);
 
   const stopGeneration = useRef<boolean>(false);
+  const pageEndRef = useRef<HTMLDivElement>(null);
 
   const [currentModel, setCurrentModel] = useState<string>('');
   const [history, setHistory] = useState<MessageData[]>([]);
@@ -25,6 +26,12 @@ export default function Chat() {
   useEffect(() => {
     checkAPI();
     loadData();
+    
+    if (pageEndRef.current) {
+      setTimeout(() => {
+        pageEndRef.current?.scrollIntoView({ block: 'end' });
+      },25);
+    }
   }, [id]);
 
   const checkAPI = async () => {
@@ -131,7 +138,12 @@ export default function Chat() {
   function ChatMessageComponent({ index, message }: { index: number, message: MessageData}) {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editText, setEditText] = useState<string>(message.content);
+    const scrollRef = useRef<HTMLDivElement>(null);
   
+    useEffect(() => {
+      if (message.current) scrollRef.current?.scrollIntoView({ block: 'end' });
+    });
+
     function ChatMessageInnerComponent() {
       return (
         <div className='relative m-10'>
@@ -155,7 +167,7 @@ export default function Chat() {
               <Markdown>{message.content}</Markdown>
             }
           </div>
-          <div className='absolute hidden group-hover:block'>
+          <div className='absolute hidden group-hover:block' >
             {!isEditing &&
               <div>
                 {!currentResponse &&
@@ -183,6 +195,7 @@ export default function Chat() {
               </div>
             }
           </div>
+          <div className='absolute bottom-[-1000px]' ref={scrollRef}></div>
         </div>
         
       );
@@ -206,9 +219,11 @@ export default function Chat() {
 
   return (
     <div className='relative h-screen w-full bg-slate-900'>
-      <div className='h-screen overflow-y-scroll pb-[50px]'>
+      <div className='h-screen overflow-y-scroll'>
         {history.map((m, i) => <ChatMessageComponent key={i} index={i} message={m}/>)}
         {currentResponse && <ChatMessageComponent index={0} message={currentResponse}/>}
+        <div className='pb-[50px]'></div>
+        <div ref={pageEndRef}></div>
       </div>
       <p className='absolute bottom-0 right-0' onClick={checkAPI}>API is {apiIsOnline ? 'online' : 'offline'}</p>
 
