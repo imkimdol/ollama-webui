@@ -1,14 +1,17 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import ollama, { Message, ModelResponse } from 'ollama/browser';
+import { useContext, useEffect, useRef, useState } from 'react';
+import ollama, { ModelResponse } from 'ollama/browser';
 import Markdown from 'react-markdown';
-
-interface MessageData extends Message {
-  current: boolean,
-}
+import { MessageData, CurrentChatIDContext, loadChatDataWithID, saveChatDataWithID } from '@/misc';
+import { useRouter } from 'next/navigation';
 
 export default function Chat() {
+  const router = useRouter();
+  const id = useContext(CurrentChatIDContext);
+
+  const stopGeneration = useRef<boolean>(false);
+
   const [currentModel, setCurrentModel] = useState<string>('llama3.2');
   const [history, setHistory] = useState<MessageData[]>([]);
   const [currentResponse, setCurrentResponse] = useState<MessageData | null>(null);
@@ -16,23 +19,12 @@ export default function Chat() {
   const [apiIsOnline, setApiIsOnline] = useState<boolean>(false);
   const [models, setModels] = useState<ModelResponse[]>([]);
 
-  const stopGeneration = useRef<boolean>(false);
-
-  const checkAPI = useCallback(async () => {
-    setApiIsOnline(false);
-    setModels([]);
-    checkModels();
-  }, []);
-
   useEffect(() => {
     checkAPI();
-  }, [checkAPI]);
+    loadData();
+  }, [id]);
 
-  const updateMessages = () => {
-    setHistory([...history]);
-  }
-
-  const checkModels = async () => {
+  const checkAPI = async () => {
     try {
       const response = await ollama.list();
       const models = response.models;
@@ -43,6 +35,25 @@ export default function Chat() {
       setModels([]);
     }
   };
+
+  const loadData = () => {
+    if (!id) return router.push('/');
+
+    const data = loadChatDataWithID(id);
+    setHistory(data.history);
+  }
+  const saveData = (newHistory: MessageData[]) => {
+    if (!id) return router.push('/');
+
+    const data = loadChatDataWithID(id);
+    data.history = newHistory;
+    saveChatDataWithID(id, data);
+  }
+
+  const updateHistory = () => {
+    setHistory([...history]);
+    saveData(history);
+  }
 
   const requestChat = async (messages: MessageData[]) => {
     stopGeneration.current = false;
@@ -83,7 +94,14 @@ export default function Chat() {
       setHistory(messages);
       setCurrentResponse(null);
     }
+
+    saveData(messages);
   };
+  const deleteMessagesUpToIndex = (index: number) => {
+    const newHistory = history.slice(0, index)
+    setHistory(newHistory);
+    saveData(newHistory);
+  }
 
   const onSend = () => {
     const promptMessage = { current: false, role: 'user', content: prompt };
@@ -93,10 +111,6 @@ export default function Chat() {
 
   const onRegenerate = () => {
     requestChat(history.slice(0, -1));
-  }
-
-  const deleteMessagesUpToIndex = (index: number) => {
-    setHistory(history.slice(0, index));
   }
 
   function ChatMessageComponent({ index, message }: { index: number, message: MessageData}) {
@@ -110,7 +124,7 @@ export default function Chat() {
         {isEditing ?
         <div>
           <input type="text" value={editText} onChange={e => setEditText(e.target.value)}/>
-          <button onClick={() => {setIsEditing(false); message.content = editText; updateMessages();}}>Done</button>
+          <button onClick={() => {setIsEditing(false); message.content = editText; updateHistory();}}>Done</button>
         </div> :
         <div>
           <Markdown>{message.content}</Markdown>
@@ -121,8 +135,15 @@ export default function Chat() {
     );
   };
 
+  const goBack = () => {
+    router.push('/');
+  };
+
+  if (!id) return;
+
   return (
     <div>
+      <button onClick={goBack}>Go Back</button>
       <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
       <button onClick={checkAPI}>Refresh</button>
       
