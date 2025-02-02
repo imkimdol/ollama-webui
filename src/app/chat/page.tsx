@@ -93,19 +93,24 @@ export default function Chat() {
       }
 
       responseMessage.current = false;
-      setHistory([...messages, responseMessage]);
+      const newHistory = [...messages, responseMessage];
+      saveData(newHistory);
+      setHistory(newHistory);
+
       setCurrentResponse(null);
     } catch {
       checkAPI();
 
       responseMessage.current = false;
-      messages.push(responseMessage);
-      messages.push({ current: false, role: 'assistant', content: 'Request Failed! '});
-      setHistory(messages);
+      responseMessage.content += '\nRequest Failed!';
+      const newHistory = [...messages, responseMessage];
+      saveData(newHistory);
+      setHistory(newHistory);
+
       setCurrentResponse(null);
     }
 
-    saveData(messages);
+    
   };
   const deleteMessagesUpToIndex = (index: number) => {
     const newHistory = history.slice(0, index)
