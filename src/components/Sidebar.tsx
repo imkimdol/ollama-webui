@@ -78,6 +78,8 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
 
   return (
     <div>
+      <button disabled={currentChatID===null} onClick={()=>router.push('/')}>Home</button>
+      <br/>
       <button onClick={newChat}>New Chat</button>
       {chatIDs.map(id => <ChatButton key={id} id={id}/>)}
     </div>

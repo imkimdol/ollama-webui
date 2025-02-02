@@ -135,15 +135,8 @@ export default function Chat() {
     );
   };
 
-  const goBack = () => {
-    router.push('/');
-  };
-
-  if (!id) return;
-
   return (
     <div>
-      <button onClick={goBack}>Go Back</button>
       <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
       <button onClick={checkAPI}>Refresh</button>
       
