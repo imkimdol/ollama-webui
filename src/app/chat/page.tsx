@@ -3,8 +3,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ollama, { ModelResponse } from 'ollama/browser';
 import Markdown from 'react-markdown';
+import TextareaAutosize from 'react-textarea-autosize';
 import { MessageData, CurrentChatIDContext, loadChatDataWithID, saveChatDataWithID } from '@/misc';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function Chat() {
   const lastModelKey = 'ollama.lastModel';
@@ -125,41 +127,130 @@ export default function Chat() {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editText, setEditText] = useState<string>(message.content);
   
-    return (
-      <div>
-        <p>{ message.role === 'assistant' ? 'ASSISTANT: ' : 'USER: '}</p>
-  
-        {isEditing ?
-        <div>
-          <input type='text' value={editText} onChange={e => setEditText(e.target.value)}/>
-          <button onClick={() => {setIsEditing(false); message.content = editText; updateHistory();}}>Done</button>
-        </div> :
-        <div>
-          <Markdown>{message.content}</Markdown>
-          <button disabled={message.current} onClick={() => {setEditText(message.content); setIsEditing(true);}}>Edit</button>
-          <button disabled={message.current} onClick={() => {deleteMessagesUpToIndex(index);}}>Delete</button>
-        </div>}
-      </div>
-    );
+    function ChatMessageInnerComponent() {
+      return (
+        <div className='relative m-10'>
+          <div className='messagebox p-5 rounded-md bg-stone-700'>
+            <p>{ message.role === 'assistant' ? 'Assistant' : 'User'}</p>
+            {isEditing ?
+              <div>
+                <TextareaAutosize className='w-full bg-stone-800 resize-none' value={editText} onChange={e => setEditText(e.target.value)}/>
+                <button onClick={() => {setIsEditing(false); message.content = editText; updateHistory();}}>
+                  <Image
+                    src="/check.svg"
+                    alt="Done Icon"
+                    width={24}
+                    height={24}
+                    priority
+                  />
+                </button>
+              </div>
+
+            :
+              <Markdown>{message.content}</Markdown>
+            }
+          </div>
+          <div className='absolute hidden group-hover:block'>
+            {!isEditing &&
+              <div>
+                {!currentResponse &&
+                  <button onClick={() => {setEditText(message.content); setIsEditing(true);}}>
+                    <Image
+                      src="/edit.svg"
+                      alt="Edit Icon"
+                      width={24}
+                      height={24}
+                      priority
+                    />
+                  </button>
+                }
+                {!currentResponse &&
+                  <button onClick={() => {deleteMessagesUpToIndex(index);}}>
+                    <Image
+                      src="/delete.svg"
+                      alt="Delete Icon"
+                      width={24}
+                      height={24}
+                      priority
+                    />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        
+      );
+    };
+
+    if (message.role === 'user') {
+      return (
+        <div className='group ml-[40vw]'>
+          <ChatMessageInnerComponent />
+        </div>
+      );
+    } else {
+      return (
+        <div className='group mr-[40vw]'>
+          <ChatMessageInnerComponent />
+        </div>
+      );
+    }
+
   };
 
   return (
-    <div>
-      <p>API is {apiIsOnline ? 'online' : 'offline'}</p>
-      <button onClick={checkAPI}>Refresh</button>
-      
-      <h1>Chat</h1>
-      {history.map((m, i) => <ChatMessageComponent key={i} index={i} message={m}/>)}
-      {currentResponse && <ChatMessageComponent index={0} message={currentResponse}/>}
-      <button disabled={!apiIsOnline || currentResponse != null || history.length == 0 || history[history.length-1].role != 'assistant'} onClick={onRegenerate}>Regenerate</button>
-      <select value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
-        {models.map(m => {
-          return <option value={m.name} key={m.name}>{m.name}</option>
-        })}
-      </select>
-      <input type='text' value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
-      <button disabled={!apiIsOnline || currentResponse != null} onClick={onSend}>Send Request</button>
-      {currentResponse && <button onClick={() => stopGeneration.current = true}>Stop</button>}
+    <div className='relative h-screen w-full bg-slate-900'>
+      <div className='h-screen overflow-y-scroll pb-[50px]'>
+        {history.map((m, i) => <ChatMessageComponent key={i} index={i} message={m}/>)}
+        {currentResponse && <ChatMessageComponent index={0} message={currentResponse}/>}
+      </div>
+      <p className='absolute bottom-0 right-0' onClick={checkAPI}>API is {apiIsOnline ? 'online' : 'offline'}</p>
+
+      <div className='w-full absolute bottom-0 flex justify-center'>
+        <div className='p-3 rounded-md bg-stone-900 flex flex-row align-center justify-center gap-4'>
+          <select className='min-w-[150px] bg-stone-950' value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
+            {models.map(m => {
+              return <option value={m.name} key={m.name}>{m.name}</option>
+            })}
+          </select>
+          <TextareaAutosize className='bg-stone-950 w-full min-w-[50vw] resize-none' value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
+
+          {!currentResponse && history.length > 0 && history[history.length-1].role === 'assistant' &&
+            <button disabled={!apiIsOnline} onClick={onRegenerate}>
+              <Image
+                src="/refresh.svg"
+                alt="Regenerate Icon"
+                width={24}
+                height={24}
+                priority
+              />
+            </button>
+          }
+          {!currentResponse &&
+            <button disabled={!apiIsOnline} onClick={onSend}>
+              <Image
+                src="/send.svg"
+                alt="Send Icon"
+                width={24}
+                height={24}
+                priority
+              />
+            </button>
+          }
+          {currentResponse && 
+            <button onClick={() => stopGeneration.current = true}>
+              <Image
+                src="/stop.svg"
+                alt="Stop Icon"
+                width={24}
+                height={24}
+                priority
+              />
+            </button>
+          }
+        </div>
+      </div>
     </div>
   );
 };

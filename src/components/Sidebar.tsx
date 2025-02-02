@@ -1,6 +1,7 @@
 'use client';
 
 import { deleteChatDataWithID, loadChatDataWithID, saveChatDataWithID } from '@/misc';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { v1 as uuid } from 'uuid';
@@ -63,23 +64,45 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
     const [currentName, setNewName] = useState<string>(data.name);
     
     return (
-      <div>
+      <div className='m-1 flex flex-row justify-center' onClick={()=>loadChat(id)}>
         {!isEditing && <span>{currentName} </span>}
         {isEditing && <input type='text' value={currentName} onChange={e => setNewName(e.target.value)}/>}
-        {isEditing && <button onClick={()=>{data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>Done</button>}
-        {!isEditing && <button onClick={()=>setIsEditing(true)}>Rename</button>}
-        <button onClick={()=>deleteChat(id)}>Delete</button>
-        <button disabled={currentChatID === id} onClick={()=>loadChat(id)}>View</button>
+        {isEditing && <button onClick={e => {e.stopPropagation(); data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>
+          <Image
+            src="/check.svg"
+            alt="Done Icon"
+            width={24}
+            height={24}
+            priority
+          />
+        </button>}
+        {!isEditing && <button onClick={e => {e.stopPropagation(); setIsEditing(true);}}>
+          <Image
+            src="/edit.svg"
+            alt="Edit Icon"
+            width={24}
+            height={24}
+            priority
+          />
+        </button>}
+        <button onClick={e => {e.stopPropagation(); deleteChat(id);}}>
+          <Image
+            src="/delete.svg"
+            alt="Delete Icon"
+            width={24}
+            height={24}
+            priority
+          />
+        </button>
       </div>
 
     )
   }
 
   return (
-    <div>
-      <button disabled={currentChatID===null} onClick={()=>router.push('/')}>Home</button>
-      <br/>
-      <button onClick={newChat}>New Chat</button>
+    <div className='h-screen min-w-52 bg-slate-500 flex flex-col align-center'>
+      <p className='m-2 text-center' onClick={()=>router.push('/')}>Home</p>
+      <p className='m-2 text-center' onClick={newChat}>New Chat</p>
       {chatIDs.map(id => <ChatButton key={id} id={id}/>)}
     </div>
   );
