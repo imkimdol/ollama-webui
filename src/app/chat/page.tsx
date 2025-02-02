@@ -131,7 +131,7 @@ export default function Chat() {
   
         {isEditing ?
         <div>
-          <input type="text" value={editText} onChange={e => setEditText(e.target.value)}/>
+          <input type='text' value={editText} onChange={e => setEditText(e.target.value)}/>
           <button onClick={() => {setIsEditing(false); message.content = editText; updateHistory();}}>Done</button>
         </div> :
         <div>
@@ -157,7 +157,7 @@ export default function Chat() {
           return <option value={m.name} key={m.name}>{m.name}</option>
         })}
       </select>
-      <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
+      <input type='text' value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
       <button disabled={!apiIsOnline || currentResponse != null} onClick={onSend}>Send Request</button>
       {currentResponse && <button onClick={() => stopGeneration.current = true}>Stop</button>}
     </div>

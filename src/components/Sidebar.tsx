@@ -1,8 +1,8 @@
 'use client';
 
-import { deleteChatDataWithID, loadChatDataWithID, saveChatDataWithID } from "@/misc";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { deleteChatDataWithID, loadChatDataWithID, saveChatDataWithID } from '@/misc';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { v1 as uuid } from 'uuid';
 
 interface SidebarProps {
@@ -65,7 +65,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
     return (
       <div>
         {!isEditing && <span>{currentName} </span>}
-        {isEditing && <input type="text" value={currentName} onChange={e => setNewName(e.target.value)}/>}
+        {isEditing && <input type='text' value={currentName} onChange={e => setNewName(e.target.value)}/>}
         {isEditing && <button onClick={()=>{data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>Done</button>}
         {!isEditing && <button onClick={()=>setIsEditing(true)}>Rename</button>}
         <button onClick={()=>deleteChat(id)}>Delete</button>

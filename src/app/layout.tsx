@@ -9,8 +9,8 @@ export default function RootLayout({ children }: Readonly<{children: React.React
   const [currentChatID, setCurrentChatID] = useState<string | null>(null);
 
   return (
-    <html lang="en">
       <body>
+    <html lang='en'>
         <Sidebar currentChatID={currentChatID} setCurrentChatID={setCurrentChatID} />
         <CurrentChatIDContext.Provider value={currentChatID}>
           <SetCurrentChatIDContext.Provider value={setCurrentChatID}>
