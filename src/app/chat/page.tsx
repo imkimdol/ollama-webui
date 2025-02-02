@@ -7,12 +7,13 @@ import { MessageData, CurrentChatIDContext, loadChatDataWithID, saveChatDataWith
 import { useRouter } from 'next/navigation';
 
 export default function Chat() {
+  const lastModelKey = 'ollama.lastModel';
   const router = useRouter();
   const id = useContext(CurrentChatIDContext);
 
   const stopGeneration = useRef<boolean>(false);
 
-  const [currentModel, setCurrentModel] = useState<string>('llama3.2');
+  const [currentModel, setCurrentModel] = useState<string>('');
   const [history, setHistory] = useState<MessageData[]>([]);
   const [currentResponse, setCurrentResponse] = useState<MessageData | null>(null);
   const [prompt, setPrompt] = useState<string>('');
@@ -34,6 +35,12 @@ export default function Chat() {
       setApiIsOnline(false);
       setModels([]);
     }
+    checkLastUsedModel();
+  };
+
+  const checkLastUsedModel = () => {
+    const model = localStorage.getItem(lastModelKey);
+    if (model) setCurrentModel(model);    
   };
 
   const loadData = () => {
@@ -68,6 +75,7 @@ export default function Chat() {
         messages: messages,
         stream: true
       });
+      localStorage.setItem(lastModelKey, currentModel);
 
       let first = true;
       for await (const partialResponse of responseIterator) {
