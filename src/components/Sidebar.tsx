@@ -46,6 +46,9 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
     router.push('/chat');
   };
   const deleteChat = (id: string) => {
+    const confirmation = confirm('Do you really want to delete this chat?');
+    if (!confirmation) return;
+
     deleteChatDataWithID(id);
     if (currentChatID === id) {
       setCurrentChatID(null);
@@ -65,12 +68,8 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
         {isEditing && <input type="text" value={currentName} onChange={e => setNewName(e.target.value)}/>}
         {isEditing && <button onClick={()=>{data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>Done</button>}
         {!isEditing && <button onClick={()=>setIsEditing(true)}>Rename</button>}
-        <button onClick={()=>deleteChat(id)}>
-          Delete
-        </button>
-        <button disabled={currentChatID === id} onClick={()=>loadChat(id)}>
-          View
-        </button>
+        <button onClick={()=>deleteChat(id)}>Delete</button>
+        <button disabled={currentChatID === id} onClick={()=>loadChat(id)}>View</button>
       </div>
 
     )
