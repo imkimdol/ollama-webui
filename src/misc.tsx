@@ -13,14 +13,14 @@ export const CurrentChatIDContext = createContext<string | null>(null);
 export const SetCurrentChatIDContext = createContext<(currentChatID: string | null)=>void>(()=>{});
 
 export function loadChatDataWithID(id: string): ChatData {
-  const item = localStorage.getItem('ollama.chat.' + id);
+  const item = localStorage.getItem('ollama_chat_' + id);
   if (!item) throw new Error('No such chat exists in storage');
   return JSON.parse(item) as ChatData; 
 };
 export function saveChatDataWithID(id: string, data: ChatData): void {
   const json = JSON.stringify(data);
-  localStorage.setItem('ollama.chat.' + id, json);
+  localStorage.setItem('ollama_chat_' + id, json);
 };
 export function deleteChatDataWithID(id: string) {
-  localStorage.removeItem('ollama.chat.' + id);
+  localStorage.removeItem('ollama_chat_' + id);
 };

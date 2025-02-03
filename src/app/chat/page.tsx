@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function Chat() {
-  const lastModelKey = 'ollama.lastModel';
+  const lastModelKey = 'ollama_lastModel';
   const router = useRouter();
   const id = useContext(CurrentChatIDContext);
 

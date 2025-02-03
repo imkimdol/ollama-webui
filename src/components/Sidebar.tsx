@@ -4,7 +4,6 @@ import { deleteChatDataWithID, loadChatDataWithID, saveChatDataWithID } from '@/
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { v1 as uuid } from 'uuid';
 
 interface SidebarProps {
   currentChatID: string | null;
@@ -24,17 +23,17 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
     const newChatIDs = [];
 
     for (const k of keys) {
-      const split = k.split('.');
+      const split = k.split('_');
       if (split.length > 2 && split[0] === 'ollama' && split[1] === 'chat') {
         newChatIDs.push(split[2]);
       }
     }
 
-    setChatIDs(newChatIDs);
+    setChatIDs(newChatIDs.sort().reverse());
   };
 
   const newChat = () => {
-    const id = uuid();
+    const id = new Date().toISOString();
     const data = {
       name: 'Untitled Chat',
       history: []
