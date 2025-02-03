@@ -81,7 +81,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
         <div className='absolute top-0 right-0 h-full flex flex-row justify-center'>
           {isEditing && <button onClick={e => {e.stopPropagation(); data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>
             <Image
-              src="/check.svg"
+              src="./check.svg"
               alt="Done Icon"
               width={24}
               height={24}
@@ -90,7 +90,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
           </button>}
           {!isEditing && <button className='invisible group-hover:visible' onClick={e => {e.stopPropagation(); setIsEditing(true);}}>
             <Image
-              src="/edit.svg"
+              src="./edit.svg"
               alt="Edit Icon"
               width={24}
               height={24}
@@ -99,7 +99,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
           </button>}
           {!isEditing && <button className='invisible group-hover:visible' onClick={e => {e.stopPropagation(); deleteChat(id);}}>
             <Image
-              src="/delete.svg"
+              src="./delete.svg"
               alt="Delete Icon"
               width={24}
               height={24}
@@ -118,7 +118,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
         <div className='absolute top-0 right-0 h-full flex flex-row justify-center gap-1'>
           {/* <button>
             <Image
-              src="/Settings.svg"
+              src="./Settings.svg"
               alt="Settings Icon"
               width={24}
               height={24}
@@ -127,7 +127,7 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
           </button> */}
           <button onClick={newChat}>
             <Image
-              src="/add_comment.svg"
+              src="./add_comment.svg"
               alt="New Chat Icon"
               width={24}
               height={24}

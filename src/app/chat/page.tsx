@@ -153,7 +153,7 @@ export default function Chat() {
                 <TextareaAutosize className='w-full bg-stone-800 resize-none' value={editText} onChange={e => setEditText(e.target.value)}/>
                 <button onClick={() => {setIsEditing(false); message.content = editText; updateHistory();}}>
                   <Image
-                    src="/check.svg"
+                    src="./check.svg"
                     alt="Done Icon"
                     width={24}
                     height={24}
@@ -171,7 +171,7 @@ export default function Chat() {
                 {!currentResponse &&
                   <button onClick={() => {setEditText(message.content); setIsEditing(true);}}>
                     <Image
-                      src="/edit.svg"
+                      src="./edit.svg"
                       alt="Edit Icon"
                       width={24}
                       height={24}
@@ -182,7 +182,7 @@ export default function Chat() {
                 {!currentResponse &&
                   <button onClick={() => {deleteMessagesUpToIndex(index);}}>
                     <Image
-                      src="/delete.svg"
+                      src="./delete.svg"
                       alt="Delete Icon"
                       width={24}
                       height={24}
@@ -231,7 +231,7 @@ export default function Chat() {
             {!currentResponse && history.length > 0 && history[history.length-1].role === 'assistant' &&
               <button disabled={!apiIsOnline} onClick={onRegenerate}>
                 <Image
-                  src="/refresh.svg"
+                  src="./refresh.svg"
                   alt="Regenerate Icon"
                   width={24}
                   height={24}
@@ -242,7 +242,7 @@ export default function Chat() {
             {!currentResponse &&
               <button disabled={!apiIsOnline} onClick={onSend}>
                 <Image
-                  src="/send.svg"
+                  src="./send.svg"
                   alt="Send Icon"
                   width={24}
                   height={24}
@@ -253,7 +253,7 @@ export default function Chat() {
             {currentResponse && 
               <button onClick={() => stopGeneration.current = true}>
                 <Image
-                  src="/stop.svg"
+                  src="./stop.svg"
                   alt="Stop Icon"
                   width={24}
                   height={24}
