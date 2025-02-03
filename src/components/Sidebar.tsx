@@ -59,52 +59,90 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
   }
 
   const ChatButton = ({ id }: { id: string }) => {
+    return (
+      <div className='relative ml-1 mr-1 group' onClick={()=>loadChat(id)}>
+        {currentChatID === id ?
+          <div className='bg-stone-700 rounded-md'>
+            <ChatButtonInner id={id}/>
+          </div>
+          :
+          <div className='hover:bg-stone-800'>
+            <ChatButtonInner id={id}/>
+          </div>
+        }
+      </div>
+    );
+  };
+  const ChatButtonInner = ({ id }: { id: string }) => {
     const data = loadChatDataWithID(id);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [currentName, setNewName] = useState<string>(data.name);
     
     return (
-      <div className='m-1 flex flex-row justify-center' onClick={()=>loadChat(id)}>
-        {!isEditing && <span>{currentName} </span>}
-        {isEditing && <input type='text' value={currentName} onChange={e => setNewName(e.target.value)}/>}
-        {isEditing && <button onClick={e => {e.stopPropagation(); data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>
-          <Image
-            src="/check.svg"
-            alt="Done Icon"
-            width={24}
-            height={24}
-            priority
-          />
-        </button>}
-        {!isEditing && <button onClick={e => {e.stopPropagation(); setIsEditing(true);}}>
-          <Image
-            src="/edit.svg"
-            alt="Edit Icon"
-            width={24}
-            height={24}
-            priority
-          />
-        </button>}
-        <button onClick={e => {e.stopPropagation(); deleteChat(id);}}>
-          <Image
-            src="/delete.svg"
-            alt="Delete Icon"
-            width={24}
-            height={24}
-            priority
-          />
-        </button>
+      <div className='p-1 min-w-full rounded-md' onClick={()=>loadChat(id)}>
+        {!isEditing && <p className='overflow-x-clip text-nowrap'>{currentName}</p>}
+        {isEditing && <input className='bg-transparent outline-none ' type='text' value={currentName} onChange={e => setNewName(e.target.value)} onClick={e => {e.stopPropagation();}}/>}
+        <div className='absolute top-0 right-0 h-full flex flex-row justify-center'>
+          {isEditing && <button onClick={e => {e.stopPropagation(); data.name=currentName; saveChatDataWithID(id, data); setIsEditing(false);}}>
+            <Image
+              src="/check.svg"
+              alt="Done Icon"
+              width={24}
+              height={24}
+              priority
+            />
+          </button>}
+          {!isEditing && <button className='invisible group-hover:visible' onClick={e => {e.stopPropagation(); setIsEditing(true);}}>
+            <Image
+              src="/edit.svg"
+              alt="Edit Icon"
+              width={24}
+              height={24}
+              priority
+            />
+          </button>}
+          {!isEditing && <button className='invisible group-hover:visible' onClick={e => {e.stopPropagation(); deleteChat(id);}}>
+            <Image
+              src="/delete.svg"
+              alt="Delete Icon"
+              width={24}
+              height={24}
+              priority
+            />
+          </button>}
+        </div>
       </div>
-
-    )
-  }
+    );
+  };
 
   return (
-    <div className='h-screen min-w-52 bg-slate-500 flex flex-col align-center'>
-      <p className='m-2 text-center' onClick={()=>router.push('/')}>Home</p>
-      <p className='m-2 text-center' onClick={newChat}>New Chat</p>
+    <div className='h-screen min-w-52 max-w-52 bg-stone-900 flex flex-col align-center gap-[2px] overflow-y-scroll border-solid border-r-[1px] border-stone-500'>
+      <div className='relative m-1 p-1'>
+        <p>ollama-webui</p>
+        <div className='absolute top-0 right-0 h-full flex flex-row justify-center gap-1'>
+          {/* <button>
+            <Image
+              src="/Settings.svg"
+              alt="Settings Icon"
+              width={24}
+              height={24}
+              priority
+            />
+          </button> */}
+          <button onClick={newChat}>
+            <Image
+              src="/add_comment.svg"
+              alt="New Chat Icon"
+              width={24}
+              height={24}
+              priority
+            />
+          </button>
+        </div>
+      </div>
+      
       {chatIDs.map(id => <ChatButton key={id} id={id}/>)}
     </div>
   );
-}
+};
 

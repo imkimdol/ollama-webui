@@ -17,14 +17,14 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-h1, h2, h3, h4, p, span {
+h1, h2, p, span{
   user-select: none;
   cursor: default;
 }
-.messagebox * {
+.messagebox h1, .messagebox h2, .messagebox h3, .messagebox h4, .messagebox p, .messagebox span, .messagebox li {
   user-select: auto;
   cursor: auto;
 }

@@ -35,6 +35,8 @@ export default function Chat() {
   }, [id]);
 
   const checkAPI = async () => {
+    setApiIsOnline(false);
+    setModels([]);
     try {
       const response = await ollama.list();
       const models = response.models;
@@ -116,8 +118,6 @@ export default function Chat() {
 
       setCurrentResponse(null);
     }
-
-    
   };
   const deleteMessagesUpToIndex = (index: number) => {
     const newHistory = history.slice(0, index)
@@ -147,8 +147,7 @@ export default function Chat() {
     function ChatMessageInnerComponent() {
       return (
         <div className='relative m-10'>
-          <div className='messagebox p-5 rounded-md bg-stone-700'>
-            <p>{ message.role === 'assistant' ? 'Assistant' : 'User'}</p>
+          <div className='messagebox p-5 rounded-lg bg-stone-700'>
             {isEditing ?
               <div>
                 <TextareaAutosize className='w-full bg-stone-800 resize-none' value={editText} onChange={e => setEditText(e.target.value)}/>
@@ -162,7 +161,6 @@ export default function Chat() {
                   />
                 </button>
               </div>
-
             :
               <Markdown>{message.content}</Markdown>
             }
@@ -207,68 +205,74 @@ export default function Chat() {
           <ChatMessageInnerComponent />
         </div>
       );
-    } else {
+    } else if (message.role === 'assistant') {
       return (
         <div className='group mr-[40vw]'>
           <ChatMessageInnerComponent />
         </div>
       );
     }
-
   };
 
   return (
-    <div className='relative h-screen w-full bg-slate-900'>
+    <div className='relative h-screen w-full bg-stone-900'>
       <div className='h-screen overflow-y-scroll'>
         {history.map((m, i) => <ChatMessageComponent key={i} index={i} message={m}/>)}
         {currentResponse && <ChatMessageComponent index={0} message={currentResponse}/>}
-        <div className='pb-[50px]'></div>
+        <div className='pb-[5em]'></div>
         <div ref={pageEndRef}></div>
       </div>
-      <p className='absolute bottom-0 right-0' onClick={checkAPI}>API is {apiIsOnline ? 'online' : 'offline'}</p>
 
       <div className='w-full absolute bottom-0 flex justify-center'>
-        <div className='p-3 rounded-md bg-stone-900 flex flex-row align-center justify-center gap-4'>
-          <select className='min-w-[150px] bg-stone-950' value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
-            {models.map(m => {
-              return <option value={m.name} key={m.name}>{m.name}</option>
-            })}
-          </select>
-          <TextareaAutosize className='bg-stone-950 w-full min-w-[50vw] resize-none' value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={'Prompt goes here'}/>
+        <div className='p-3 rounded-md bg-stone-800 flex flex-col gap-4'>
+          <div className='flex flex-row items-center justify-center gap-4'>
+            <TextareaAutosize className='bg-transparent w-full min-w-[600px] resize-none outline-none' value={prompt} onChange={e => setPrompt(e.target.value)} placeholder='Enter a message...'/>
 
-          {!currentResponse && history.length > 0 && history[history.length-1].role === 'assistant' &&
-            <button disabled={!apiIsOnline} onClick={onRegenerate}>
-              <Image
-                src="/refresh.svg"
-                alt="Regenerate Icon"
-                width={24}
-                height={24}
-                priority
-              />
+            {!currentResponse && history.length > 0 && history[history.length-1].role === 'assistant' &&
+              <button disabled={!apiIsOnline} onClick={onRegenerate}>
+                <Image
+                  src="/refresh.svg"
+                  alt="Regenerate Icon"
+                  width={24}
+                  height={24}
+                  priority
+                />
+              </button>
+            }
+            {!currentResponse &&
+              <button disabled={!apiIsOnline} onClick={onSend}>
+                <Image
+                  src="/send.svg"
+                  alt="Send Icon"
+                  width={24}
+                  height={24}
+                  priority
+                />
+              </button>
+            }
+            {currentResponse && 
+              <button onClick={() => stopGeneration.current = true}>
+                <Image
+                  src="/stop.svg"
+                  alt="Stop Icon"
+                  width={24}
+                  height={24}
+                  priority
+                />
+              </button>
+            }
+          </div>
+          <div className='flex flex-row justify-between'>
+            <select className='max-w-[150px] bg-transparent hover:bg-stone-900' value={currentModel} onChange={e => setCurrentModel(e.target.value)}>
+              {models.map(m => {
+                return <option className='bg-stone-700' value={m.name} key={m.name}>{m.name}</option>
+              })}
+            </select>
+            <button onClick={checkAPI} className='flex flex-row items-center gap-1'>
+              {apiIsOnline ? <div className='h-2 w-2 rounded-[50%] bg-green-400'/> : <div className='h-2 w-2 rounded-[50%] bg-red-400'/>}
+              API is {apiIsOnline ? 'online' : 'offline'}
             </button>
-          }
-          {!currentResponse &&
-            <button disabled={!apiIsOnline} onClick={onSend}>
-              <Image
-                src="/send.svg"
-                alt="Send Icon"
-                width={24}
-                height={24}
-                priority
-              />
-            </button>
-          }
-          {currentResponse && 
-            <button onClick={() => stopGeneration.current = true}>
-              <Image
-                src="/stop.svg"
-                alt="Stop Icon"
-                width={24}
-                height={24}
-                priority
-              />
-            </button>
-          }
+          </div>
         </div>
       </div>
     </div>
