@@ -46,9 +46,6 @@ export default function Sidebar({ currentChatID, setCurrentChatID }: SidebarProp
     router.push('/chat');
   };
   const deleteChat = (id: string) => {
-    const confirmation = confirm('Do you really want to delete this chat?');
-    if (!confirmation) return;
-
     deleteChatDataWithID(id);
     if (currentChatID === id) {
       setCurrentChatID(null);
